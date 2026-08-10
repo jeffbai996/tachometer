@@ -10,7 +10,7 @@ for. If you use Claude Code, the input already exists.
 
 ```bash
 pip install tachometer
-tachometer            # -> http://localhost:871
+tachometer            # -> http://localhost:8710
 ```
 
 ## Why this and not a table of numbers

@@ -4,7 +4,7 @@ Serves the panel and the four endpoints it polls. Single file on purpose: the
 whole point of the project is that you point it at a directory and it works,
 so the server should be something a reader can hold in their head.
 
-    python -m tachometer              # -> http://localhost:871
+    python -m tachometer              # -> http://localhost:8710
     python -m tachometer --doctor     # what did it actually find?
 """
 from __future__ import annotations
@@ -152,8 +152,10 @@ def doctor() -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser(prog="tachometer", description=__doc__)
-    ap.add_argument("--port", type=int, default=871,
-                    help="port to serve on (default: 871)")
+    # 8710, not 871: ports below 1024 need root on Linux and macOS, so the
+    # one-line quickstart in the README would fail for most people.
+    ap.add_argument("--port", type=int, default=8710,
+                    help="port to serve on (default: 8710)")
     ap.add_argument("--host", default="127.0.0.1",
                     help="bind address (default: 127.0.0.1)")
     ap.add_argument("--doctor", action="store_true",
