@@ -1,5 +1,5 @@
 {% extends "_base.html" %}
-{% block title %}telemetry{% endblock %}
+{% block title %}tachometer{% endblock %}
 {% block content %}
 
 {#
@@ -12,7 +12,7 @@
 
 <div class="rk-head">
   <div class="rk-title">
-    <span class="rk-title-main">TELEMETRY</span>
+    <span class="rk-title-main">TACHOMETER</span>
   </div>
   <div class="rk-head-right">
     <div class="rk-range" id="rk-range" role="group" aria-label="Time window">
@@ -67,21 +67,10 @@
         <button type="button" class="rk-cal-go" id="rk-cal-go">APPLY</button>
       </div>
     </div>
-    {# Density control (reported: "let me see all 4 machines at a normal
-       zoom level"). FULL = the faceplates; COMPACT = one-line strips, all hosts
-       visible at once. Choice persists in localStorage. #}
-    <div class="rk-range rk-density" id="rk-density" role="group" aria-label="Card density">
-      <button class="rk-range-btn is-on" data-density="full" title="Full faceplates">FULL</button>
-      <button class="rk-range-btn" data-density="compact" title="One line per machine, all hosts at once">COMPACT</button>
-    </div>
-    {# Tachometer fold (reported: "the tachometer section should be able
-       to be minimized by user, prolly toggled in the TELEMETRY bar"). Lives
-       here rather than on the tach itself so the control stays reachable once
-       the panel is collapsed. Persists in localStorage. #}
-    <div class="rk-range" id="rk-tachtoggle" role="group" aria-label="Tachometer">
-      <button class="rk-range-btn is-on" id="rk-tachbtn" aria-pressed="true"
-              title="Show or hide the token tachometer">TACH</button>
-    </div>
+    {# The density toggle (FULL/COMPACT) and the tachometer fold both came
+       from a multi-machine page where the panel shared space with a hardware
+       rack. Here the panel IS the page: there are no faceplates to compact,
+       and folding the tachometer away would leave an empty screen. #}
     <span class="rk-led" id="rk-pulse"></span>
   </div>
 </div>
