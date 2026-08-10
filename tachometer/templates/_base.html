@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}tachometer{% endblock %}</title>
+<style>
+  /* Deliberately minimal. The panel carries its own design tokens and every
+     rule it needs, so this is a page shell and not a style system: a dark
+     ground for the instrument to sit on, and nothing that could fight it. */
+  html { background: #0b0d0f; }
+  body {
+    margin: 0;
+    padding: 1.25rem;
+    background: #0b0d0f;
+    color: #cdd3da;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* The panel is instrument-dense and does not reflow below its own layout
+     width; let it scroll rather than crush its columns. */
+  .page { min-width: 340px; }
+</style>
+</head>
+<body>
+<div class="page">
+{% block content %}{% endblock %}
+</div>
+</body>
+</html>

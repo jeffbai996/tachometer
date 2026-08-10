@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tachometer"
+version = "0.1.0"
+description = "A live instrument panel for what Claude Code is costing you."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Jeff Bai" }]
+keywords = ["claude", "claude-code", "tokens", "cost", "dashboard", "tui"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Web Environment",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Utilities",
+]
+# tomllib is stdlib from 3.11, which is why that is the floor.
+dependencies = ["flask>=3.0"]
+
+[project.urls]
+Homepage = "https://github.com/jeffbai996/tachometer"
+Issues = "https://github.com/jeffbai996/tachometer/issues"
+
+[project.scripts]
+tachometer = "tachometer.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["tachometer*"]
+
+[tool.setuptools.package-data]
+tachometer = ["templates/*.html"]
