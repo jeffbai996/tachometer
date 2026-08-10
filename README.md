@@ -2,8 +2,6 @@
 
 A live instrument panel for what Claude Code is costing you.
 
-![The tachometer panel](docs/hero.png)
-
 Point it at your Claude Code config directory and it reads the transcripts
 already on disk. No proxy, no API key, no instrumentation, nothing to sign up
 for. If you use Claude Code, the input already exists.

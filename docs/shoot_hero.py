@@ -49,7 +49,12 @@ async def main() -> None:
                 await page.wait_for_timeout(1200)
         except Exception:
             pass
-        await page.locator("#tach").screenshot(path=OUT, timeout=30000)
+        # caret="initial" skips playwright's font-settling wait. The panel
+        # loads webfonts, and in a headless environment they can never finish
+        # resolving — the screenshot then hangs on "waiting for fonts to load"
+        # rather than failing, which looks like the browser is broken.
+        await page.locator("#tach").screenshot(
+            path=OUT, caret="initial", animations="disabled", timeout=45000)
         await browser.close()
     print("wrote", OUT)
 
