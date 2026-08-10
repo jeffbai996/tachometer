@@ -19,9 +19,14 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 PKG = ROOT / "tachometer"
 sys.path.insert(0, str(ROOT))
 
-# Modules that only exist in the private codebase this was carved from.
-FOREIGN = {"store", "fleet", "status", "bot_config", "inventory", "server",
-           "squad_store"}
+# Modules that only exist in the codebase this was carved from. Generic names
+# on purpose — these are the ones a hand-ported change is most likely to drag
+# back in, and any of them resolving here means the port brought a dependency
+# with it. Extend via TACHOMETER_FOREIGN_MODULES for a specific origin.
+FOREIGN = {"store", "fleet", "status", "bot_config", "inventory", "server"}
+FOREIGN |= {m.strip() for m in
+            os.environ.get("TACHOMETER_FOREIGN_MODULES", "").split(",")
+            if m.strip()}
 
 SOURCES = sorted(PKG.rglob("*.py"))
 TEMPLATES = sorted(PKG.rglob("*.html"))

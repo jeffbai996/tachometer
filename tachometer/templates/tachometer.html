@@ -227,7 +227,7 @@
         {# Dark-state copy: the lamp starts unlit, and the painter swaps this
            for the live rate once it lights. #}
         <span class="tach-lamp" id="tach-lamp-hiusd" data-tip="No bot is burning $300/hour or more.">RATE</span>
-        <span class="tach-lamp" id="tach-lamp-grand" data-tip="On track for a $1,500+ day. The expensive tier.">SPEND</span>
+        <span class="tach-lamp" id="tach-lamp-grand" data-tip="Projected spend over $1,500 today.">SPEND</span>
         {# LOAD replaces NITE (reported). NITE was a clock check — it
            told you the hour, which you already knew. This watches the one
            combination nothing else on the panel does: a huge context being
@@ -2229,7 +2229,7 @@ body { user-select: none; -webkit-user-select: none; }
 #tach-usd, .tach-usdfig { align-items: baseline; }
 #tach-usd i, .tach-usdfig i { font-style: normal; font-size: 0.72rem;
               font-weight: 600; color: var(--rk-dim); margin-right: 0.05em; }
-/* -0.055em, not -0.03. SPENT TODAY crossed into six digits ($2214.21) and the
+/* -0.055em, not -0.03. SPENT TODAY crossed into six digits and the
    figure ran 4.3px past the tile's inner width — measured, and it is pure
    digits with no unit, so shrinking the unit font would not have touched it
    (reported: "i thought it worked just fine before?" — it did, until
@@ -3608,7 +3608,7 @@ function paintRolling(element, value) {
       wheel is already moving while the tens is only just breaking loose.
 
    The first reading after page load is planted, not tweened — nobody wants to
-   watch $0 climb to $248k on every refresh. */
+   watch the odometer climb from zero on every refresh. */
 
 function _buildCashDrums(host, digits, fracDigits) {
   /* (Re)build the wheel housing only when the DIGIT COUNT changes — rolling
@@ -6141,10 +6141,9 @@ addEventListener("pageshow", (e) => {
     // projection of where the day lands. It reads usd_per_hour directly.
     //
     // History, because this has moved twice: it was $/hr >= 150, raised to 300
-    // (2026-08-01), then converted to a $200/day PROJECTION on 2026-08-05
-    // (2e996b7b). That made it the same quantity as SPEND at a lower threshold,
-    // and a $200 day is ordinary here — 86% of the ledger's 70 active days
-    // clear it — so the lamp was lit nearly always and said nothing (the user
+    // then converted to a daily PROJECTION. That made it the same quantity
+    // as SPEND at a lower threshold, and on a busy fleet most days clear it,
+    // so the lamp was lit nearly always and said nothing (the user
     // 2026-08-07: "rate was definitely wired up different before cus it would
     // only come on if it was a high instantaneous rate, like $500/hr ... lets
     // go back to that"). Back to $/hr, at 300 — he named 500 first, then
@@ -7457,7 +7456,8 @@ addEventListener("pageshow", (e) => {
   //   DAILY windows — n buckets, each already a complete total. Trapezoid
   //                   spans the n-1 GAPS between midday anchors, so the first
   //                   and last days contribute only half each. Predicted
-  //                   shortfall (first+last)/2 = $1,617.66; measured $1,617.67.
+  //                   shortfall is exactly (first+last)/2 — predicted and
+  //                   measured agreed to the cent.
   //                   A total must be SUMMED, not integrated.
   // `anchor` false integrates WITHOUT rescaling to the settled fleet total.
   // The anchor exists to pin the whole-fleet curve to money that was actually
@@ -7861,8 +7861,8 @@ addEventListener("pageshow", (e) => {
     if (totHead) totHead.textContent =
       histWin === "today" ? "total today" : fmtWin(histEffSec) + " total";
     // SPENT integrates over the SELECTED window, so its label has to name that
-    // window too — it was hardcoded "SPENT 1H" and read as $56k spent in an
-    // hour on a 90d view (2026-08-01).
+    // window too — hardcoded "SPENT 1H" made a 90-day total read as an
+    // hour's spend, which is absurd by orders of magnitude.
     const spentLbl = document.getElementById("tach-spent-lbl");
     if (spentLbl) spentLbl.textContent = histWin === "today"
       ? "SPENT TODAY" : "SPENT " + fmtWin(histEffSec).toUpperCase();
