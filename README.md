@@ -1,89 +1,42 @@
 # tachometer
 
-A live instrument panel for what Claude Code is costing you.
+A live instrument panel for Claude Code token velocity and estimated cost. Reads the transcripts already on disk; no proxy or API key.
 
-Point it at your Claude Code config directory and it reads the transcripts
-already on disk. No proxy, no API key, no instrumentation, nothing to sign up
-for. If you use Claude Code, the input already exists.
+## Install
 
 ```bash
 git clone https://github.com/jeffbai996/tachometer
 cd tachometer
 python -m venv venv && venv/bin/pip install -e .
-venv/bin/tachometer          # -> http://localhost:8710
 ```
 
-## Why an instrument and not a table of numbers
+Python 3.11+, Flask.
 
-A number tells you what happened. An instrument tells you what is happening.
+## Usage
 
-A dial you glance at answers "is something running away right now" faster than
-a figure you have to read, then compare against a figure you remember. That is
-the whole argument: the gauge, the lamps, and the burn curve are the product,
-and the numbers underneath are available anywhere.
+```bash
+tachometer [--host 127.0.0.1] [--port 8710] [--doctor]
+```
 
-## What it shows
+Serves the panel at http://localhost:8710. `--doctor` prints the resolved config directory, transcript and turn counts, estimated cost, and every model seen, flagging models with no rate. If the panel shows nothing, run it first: the usual cause is a non-default config directory.
 
-**The dial** — live token velocity across every session it can see, with a
-redline. The needle has
-real ballistics and a decay curve, so a burst reads as a burst and a stopped
-session winds down instead of dropping dead to zero.
-
-**The annunciators** — a row of lamps for conditions worth knowing without
-reading anything: a session compacting, a spike well above the running average,
-a burn rate past your threshold, a link that stopped answering. They warm and
-cool like real panel lamps rather than switching, so movement catches the eye at
-the edge of vision. Every lamp names its own threshold on hover.
-
-The panel was carved out of a larger fleet dashboard. The reserve arcs (weekly
-quota left) and the remote-link lamps need quota and remote-host data that this
-standalone server does not collect, so they stay idle.
-
-**The roster** — each session with its state, tokens today, and current rate, so
-a runaway is attributable rather than merely visible. Hovering a row reveals its
-model and context size.
-
-**The graph** — token velocity, dollar burn, cumulative spend, or daily spend,
-over windows from an hour to 90 days. Hovering names the sample under the
-cursor. `MIX` splits the curve into stacked bands by vendor, which answers
-"which subscription is this" without a second chart.
+Panel: dial (token velocity, redline), annunciator lamps (hover for thresholds), session roster, and a graph (velocity, burn, cumulative, daily; 1 hour to 90 days; `MIX` splits by vendor).
 
 ## Configuration
 
-Written to `~/.config/tachometer/config.toml` on first run:
+`~/.config/tachometer/config.toml`, written on first run. Defaults and comments are in `tachometer/config.py`.
 
-```toml
-# Where to look. Claude Code's own config directory; transcripts live in
-# <config_dir>/projects. CLAUDE_CONFIG_DIR overrides this if it is set.
-config_dir = "~/.claude"
+- `config_dir`: Claude Code config directory; transcripts are read from `<config_dir>/projects`. `CLAUDE_CONFIG_DIR` overrides it.
+- `[rates]`: USD per million tokens, `[input, output]`, matched to the model id by substring, longest key first.
+- `cache_read_multiplier`, `cache_write_multiplier`: cache billing relative to the input rate.
 
-# USD per million tokens, [input, output]. These are published list prices and
-# they go stale — edit freely, and add your own tiers. Matched against the
-# model id by substring, longest key first, so "opus" covers every Opus
-# release while an "opus-4-8" entry would override just that one.
-[rates]
-opus   = [5.0, 25.0]
-sonnet = [3.0, 15.0]
-haiku  = [1.0, 5.0]
+State: `$XDG_DATA_HOME/tachometer/` (default `~/.local/share/tachometer/`; `TACHOMETER_DATA_DIR` moves the usage ledger). Holds `token_rate.db` (sample cache) and `usage_ledger.json`.
 
-# Cache reads bill at a fraction of the input rate; writes at a premium.
-cache_read_multiplier  = 0.10
-cache_write_multiplier = 1.25
-```
+## Notes
 
-A model with no rate is counted at **$0** and named by `--doctor`, rather than
-being quietly folded into the total at a guessed price.
-
-The dollar figures are a **local estimate** from token counts and the rates
-above, the same way Claude Code's own `/usage` computes it. On a subscription
-they are not a bill — they are what the same work would have cost through the
-API, which is the number that says whether a workflow was worth its tokens.
-
-## Requirements
-
-Python 3.11+ and Flask to run it. The panel is a single HTML file with no build
-step and no bundler. The tests need `pytest`; regenerating the screenshot needs
-`playwright`.
+- A model with no configured rate is counted at $0 and named by `--doctor`.
+- Dollar figures are a local estimate from token counts and the configured rates. On a subscription they are not a bill.
+- The reserve arcs and remote-link lamps need quota and remote-host data this server does not collect; they stay idle.
 
 ## Tests
 
@@ -92,17 +45,6 @@ pip install pytest
 python -m pytest tests
 ```
 
-## Troubleshooting
-
-```bash
-tachometer --doctor
-```
-
-Prints the config directory it resolved, how many transcripts and turns it
-found, the estimated cost, and every model it saw — flagging any that have no
-rate configured. Most "it shows nothing" reports are a config directory
-somewhere non-default, and this says so in one line.
-
 ## Regenerating the screenshot
 
 ```bash
@@ -110,8 +52,7 @@ tachometer &
 python docs/shoot_hero.py
 ```
 
-Requires `playwright` and `playwright install chromium`. The script writes
-`docs/hero.png`; the image is not committed.
+Needs `playwright` and `playwright install chromium`. Writes `docs/hero.png`, which is not committed.
 
 ## License
 
