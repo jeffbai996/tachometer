@@ -25,7 +25,7 @@ and the numbers underneath are available anywhere.
 ## What it shows
 
 **The dial** — live token velocity across every session it can see, with a
-redline and a reserve arc for what is left of your weekly quota. The needle has
+redline. The needle has
 real ballistics and a decay curve, so a burst reads as a burst and a stopped
 session winds down instead of dropping dead to zero.
 
@@ -34,6 +34,10 @@ reading anything: a session compacting, a spike well above the running average,
 a burn rate past your threshold, a link that stopped answering. They warm and
 cool like real panel lamps rather than switching, so movement catches the eye at
 the edge of vision. Every lamp names its own threshold on hover.
+
+The panel was carved out of a larger fleet dashboard. The reserve arcs (weekly
+quota left) and the remote-link lamps need quota and remote-host data that this
+standalone server does not collect, so they stay idle.
 
 **The roster** — each session with its state, tokens today, and current rate, so
 a runaway is attributable rather than merely visible. Hovering a row reveals its
@@ -77,8 +81,16 @@ API, which is the number that says whether a workflow was worth its tokens.
 
 ## Requirements
 
-Python 3.11+ and Flask. That is the list. The panel is a single HTML file with
-no build step and no bundler.
+Python 3.11+ and Flask to run it. The panel is a single HTML file with no build
+step and no bundler. The tests need `pytest`; regenerating the screenshot needs
+`playwright`.
+
+## Tests
+
+```bash
+pip install pytest
+python -m pytest tests
+```
 
 ## Troubleshooting
 
@@ -98,7 +110,8 @@ tachometer &
 python docs/shoot_hero.py
 ```
 
-Requires `playwright` and `playwright install chromium`.
+Requires `playwright` and `playwright install chromium`. The script writes
+`docs/hero.png`; the image is not committed.
 
 ## License
 
