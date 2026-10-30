@@ -688,7 +688,7 @@ body { user-select: none; -webkit-user-select: none; }
   --rk-drop:  0 10px 24px -18px rgba(15,23,42,0.35);
   /* The LED wells used to stay #090b0f in every theme, which put hard black
      slabs on white cards — the single thing that made light mode look unfinished
-     next to operator/fragify (reported). In light they become a soft
+     next to the other dashboards (reported). In light they become a soft
      inset well instead; the lit segments still read because they carry their own
      colour, they just no longer sit in a black trough. */
   --rk-well:    #e8ebf0;
@@ -1177,7 +1177,7 @@ body { user-select: none; -webkit-user-select: none; }
                          border-color: var(--lamp-edge);
                          text-shadow: var(--lamp-glow); }
 /* FULL is amber, not green: a bot near its context limit is a heads-up, not a
-   healthy state (it was green as BUSY, where "squad is working" was good news). */
+   healthy state (it was green as BUSY, where "agents are working" was good news). */
 #tach-lamp-thin.is-on  { --lamp-ink: var(--rk-amber);
                          --lamp-glow: 0 0 7px color-mix(in srgb, var(--rk-amber) 65%, transparent);
                          --lamp-edge: color-mix(in srgb, var(--rk-amber) 45%, transparent);
@@ -3080,14 +3080,14 @@ body { user-select: none; -webkit-user-select: none; }
 .rk-readout { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.5rem; }
 /* Optical tracking scales WITH size — the bigger the numeral, the more air
    sits between glyphs at a fixed em value, so a flat -0.035em reads loose at
-   3.2rem even though it looks right on a heading. Mirrors fragify, which runs
+   3.2rem even though it looks right on a heading. Mirrors a sibling app, which runs
    -.035em on brand/headings but tightens to -.055/-.06em on its big display
    figures (reported, "spacing is a bit too big"). */
 .rk-big { font-family: var(--rk-num); font-size: 3.2rem; font-weight: 650; line-height: 0.82;
           color: var(--rk-ink); font-variant-numeric: tabular-nums; letter-spacing: -0.055em; }
 .rk-mid { font-family: var(--rk-num); font-size: 2.3rem; font-weight: 650; line-height: 0.82;
           color: var(--rk-ink); font-variant-numeric: tabular-nums; letter-spacing: -0.045em; }
-/* ── Rolling digits — CSS ported from fragify's .time-wheel ──────────────
+/* ── Rolling digits — CSS ported from a sibling app's .time-wheel ────────
    inline-grid stacks old/new in ONE cell (grid-area 1/1) so they overlap; the
    window is 1em tall with overflow:hidden, so the pair slides through it. The
    .rolling class is what commits the transform, which is why the JS forces a
@@ -3443,9 +3443,9 @@ body { user-select: none; -webkit-user-select: none; }
 </style>
 
 <script>
-/* ── Rolling digits — PORT of fragify's paintRollingTime ────────────────
-   the user asked for "the fragify rolling animation" (2026-07-27). I first wrote
-   a 0-9 strip translated by -Nem; fragify's is better and this now matches
+/* ── Rolling digits — PORT of a sibling app's paintRollingTime ──────────
+   the user asked for the same rolling animation (2026-07-27). I first wrote
+   a 0-9 strip translated by -Nem; the original is better and this now matches
    it: each changed digit renders exactly TWO spans — the old one sliding up
    and out, the new one sliding in from below — then settles back to a single
    static span. Two nodes per roll instead of ten, and it can roll between
@@ -3454,7 +3454,7 @@ body { user-select: none; -webkit-user-select: none; }
    Every numeric readout here flows through setText(), so the roll lives at
    that one chokepoint rather than in 26 call sites.
 
-   Details carried over from fragify's implementation, each of which cost
+   Details carried over from the original implementation, each of which cost
    someone a bug:
    - NO whitespace between the old/new spans. The cell is an inline-grid, so
      a newline + indent becomes an anonymous grid item that nudges the digit
@@ -6217,7 +6217,7 @@ addEventListener("pageshow", (e) => {
     // freshly-purged 6h window as a dead selector). Lit = still refilling.
     // Context window per model, for the FULL lamp. Names come from the
     // server's ctx_model string, which is a display label rather than an API
-    // id — so match loosely on substring and fall back to the 1M the squad's
+    // id — so match loosely on substring and fall back to the 1M the
     // Claude bots actually run at (a session was observed at 955k, so the window
     // is demonstrably 1M, not the 200k default).
     //
@@ -6645,7 +6645,7 @@ addEventListener("pageshow", (e) => {
 
     // Four tiers, not three. `idle` covered both "quiet for a few minutes" and
     // "gone for ten hours", so an idle gpt sorted level with an inactive
-    // a remote session and the two interleaved alphabetically (reported: // "gpt and jiabanya should still sit above the inactive bots"). Splitting
+    // a remote session and the two interleaved alphabetically (reported: idle // sessions should still sit above the inactive ones). Splitting
     // inactive into its own tier keeps still-present bots together at the top.
     // FIVE tiers now — offline sinks below inactive (reported: "offline
     // bots should be dropped to the inactive section below the inactive

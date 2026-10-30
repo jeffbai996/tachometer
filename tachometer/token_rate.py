@@ -324,7 +324,7 @@ def _cumulative(row: dict[str, Any]) -> tuple[Optional[float], Optional[float]]:
     while the needle reads zero" is precisely what the dial's CACHE annunciator
     exists to show. Tokens mean work; dollars mean money.
 
-    A row with no detail block (gemma / an errored bot) yields (None, None) so
+    A row with no detail block (an idle or errored bot) yields (None, None) so
     it's skipped rather than counted as zero — a zero would read as a drop to
     idle and then spike when it came back."""
     detail = row.get("detail")

@@ -111,10 +111,13 @@ def test_the_data_and_config_paths_are_xdg_not_a_hardcoded_home():
     tool has to land in the user's own XDG locations."""
     from tachometer import config, token_rate, usage_ledger
 
+    data = os.path.expanduser(os.environ.get("XDG_DATA_HOME", "~/.local/share"))
+    conf = os.path.expanduser(os.environ.get("XDG_CONFIG_HOME", "~/.config"))
+    roots = tuple(r for r in (data, conf, os.environ.get("TACHOMETER_DATA_DIR")) if r)
     for path in (token_rate.DB_FILE, usage_ledger.DATA_DIR,
                  config.CONFIG_PATH):
-        assert "claude-agents" not in path, f"{path} points into the origin repo"
-        assert "squad" not in path.lower(), f"{path} points into the origin repo"
+        assert os.path.expanduser(path).startswith(roots), (
+            f"{path} is outside the XDG data and config directories")
 
 
 def test_every_url_for_endpoint_in_the_template_exists_in_the_server():
