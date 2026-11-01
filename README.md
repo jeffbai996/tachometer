@@ -1,62 +1,57 @@
 # tachometer
 
-A live instrument panel for what Claude Code is costing you.
+A live dial for what Claude Code is costing you. It reads the transcripts Claude Code already writes to disk, so there is no proxy to set up and no API key to hand over.
 
-It reads the transcripts Claude Code already writes to disk. No proxy, no API key, no instrumentation, nothing to sign up for. If you use Claude Code, the input already exists.
+![The panel at a steady burn: a dial in the amber zone, a list of projects with their token rates, and a burn curve for the last hour](docs/images/panel-warm.png)
 
-![The panel at a steady burn](docs/images/panel-warm.png)
+## Why a dial
+
+A dial shows whether something is running away right now. You see it at a glance, without reading a figure and comparing it with one you remember.
+
+![The same panel past the redline: the dial face is red, several lamps are lit and the burn curve has jumped](docs/images/panel-redline.png)
+
+## What it shows
+
+**The dial** adds up token velocity across every project. The scale is logarithmic, so a quiet chat and a burst of parallel agents both move the needle. Claude Code records usage when a message finishes, so a minute of work arrives as one jump. The needle averages over the last 15 seconds to turn that jump into a steady reading. When a project goes quiet, its reading holds for 45 seconds and then fades to zero over the next 45. Past the redline the whole face turns red.
+
+**The lamps** stay dark until their condition is true: burn past the redline, a spike at twice the recent average, two or more projects burning at once. They warm up and cool down like bulbs instead of switching. Hover a lamp to read what it means.
+
+**The roster** has one row per project, with its state, tokens today and current rate. When something runs away, you can see whose it is.
+
+**The graph** plots token velocity, dollar burn, or spend added up over the window. Windows run from one hour to seven days, which is how long the sample store keeps data.
+
+The panel was cut from a larger dashboard, and some parts have nothing to read here. The quota arcs, the SSH lamp and the lamps for compaction and context size need data this server does not send, so they stay dark. The daily-spend view and the windows past seven days read a ledger this server never writes, so they stay empty.
+
+## Install
+
+Python 3.11 or newer.
 
 ```bash
 git clone https://github.com/jeffbai996/tachometer
 cd tachometer
 python -m venv venv && venv/bin/pip install -e .
-venv/bin/tachometer          # http://localhost:8710
+venv/bin/tachometer
 ```
 
-## Why an instrument and not a table of numbers
-
-A number tells you what happened. An instrument tells you what is happening.
-
-You can glance at a dial and see whether something is running away right now, faster than you can read a figure and compare it with one you remember. The gauge, the lamps and the burn curve are the point. The numbers underneath are available anywhere.
-
-![The same panel at redline](docs/images/panel-redline.png)
-
-## What it shows
-
-- **The dial:** live token velocity across every session it can see, with a redline. The needle has ballistics and a decay curve, so a burst reads as a burst, and a stopped session winds down instead of dropping straight to zero.
-- **The annunciators:** lamps for conditions you want to know about without reading anything:
-  - a session compacting
-  - a spike well above the running average
-  - a burn rate past your threshold
-  - a link that stopped answering
-
-  They warm and cool like panel lamps instead of switching, so movement catches the eye at the edge of vision. Each lamp names its threshold on hover.
-- **The roster:** each session with its state, tokens today and current rate, so you can see which session a runaway belongs to. Hovering a row shows its model and context size.
-- **The graph:** token velocity, dollar burn, cumulative spend or daily spend, over windows from an hour to 90 days. `MIX` splits the curve into stacked bands by vendor, which tells you which subscription the burn belongs to without a second chart.
-
-The panel was carved out of a larger fleet dashboard. The reserve arcs (weekly quota left) and the remote-link lamps need quota and remote-host data this standalone server does not collect, so they stay idle.
+Then open http://localhost:8710.
 
 ## Usage
 
-```bash
+```
 tachometer [--host 127.0.0.1] [--port 8710] [--doctor]
 ```
 
-`--doctor` prints the config directory it resolved, how many transcripts and turns it found, the estimated cost, and every model it saw. It flags any model with no rate configured. When the panel shows nothing, the cause is usually a config directory somewhere non-default, and this says so in one line.
+If the panel is empty, run `--doctor`. The usual cause is a Claude Code config directory in a non-default place. `--doctor` prints where it looked, how many transcripts and turns it found, the estimated cost, and each model it saw. A model with no rate is marked `NO RATE`.
 
 ## Configuration
 
-Written to `~/.config/tachometer/config.toml` on first run:
+The config file is written to `~/.config/tachometer/config.toml` on first run:
 
 ```toml
-# Claude Code's own config directory; transcripts live in <config_dir>/projects.
-# CLAUDE_CONFIG_DIR overrides this if it is set.
+# Transcripts are in <config_dir>/projects. CLAUDE_CONFIG_DIR overrides this.
 config_dir = "~/.claude"
 
-# USD per million tokens, [input, output]. Published list prices go stale, so
-# edit freely and add your own tiers. Matched against the model id by
-# substring, longest key first, so "opus" covers every Opus release while an
-# "opus-4-8" entry would override just that one.
+# USD per million tokens, [input, output].
 [rates]
 opus   = [5.0, 25.0]
 sonnet = [3.0, 15.0]
@@ -67,22 +62,22 @@ cache_read_multiplier  = 0.10
 cache_write_multiplier = 1.25
 ```
 
-A model with no rate is counted at $0 and named by `--doctor`. It is never folded into the total at a guessed price.
+List prices go stale, so edit the rates and add your own. A rate key is matched against the model id as a substring, longest key first. `opus` covers every Opus release, and an `opus-4-8` entry overrides it for that one model.
 
-The dollar figures are a local estimate from token counts and the rates above, computed the same way as Claude Code's own `/usage`. On a subscription they are not a bill. They are what the same work would have cost through the API, which is the number that tells you whether a workflow was worth its tokens.
+A model with no rate is counted at $0 and named by `--doctor`. It is never priced at a guess, because a plausible wrong total is worse than a visible gap.
 
-State lives in `$XDG_DATA_HOME/tachometer/` (default `~/.local/share/tachometer/`; `TACHOMETER_DATA_DIR` moves it). It holds the sample cache `token_rate.db` and `usage_ledger.json`.
+The dollar figure is an estimate from token counts and these rates. On a subscription it is not a bill. It is what the same work would have cost through the API.
 
-## Requirements and tests
+The sample store, `token_rate.db`, lives in `$XDG_DATA_HOME/tachometer/`, which is `~/.local/share/tachometer/` by default. It only caches recent samples. Deleting it costs you the recent graph history.
 
-Python 3.11+ and Flask. The panel is a single HTML file with no build step.
+## Tests
 
 ```bash
 pip install pytest
 python -m pytest tests
 ```
 
-`docs/shoot_hero.py` renders the panel headless with Playwright, if you want a screenshot of your own.
+`docs/shoot_hero.py` takes a screenshot of a running panel with Playwright.
 
 ## License
 
