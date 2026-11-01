@@ -37,7 +37,20 @@ def index() -> str:
     # instrument with different inputs, and it is not part of this project — an
     # empty host list renders the panel alone, which is what we want.
     return render_template("tachometer.html",
-                           snap={"hosts": [], "cache_ttl_sec": 1})
+                           snap={"hosts": [], "cache_ttl_sec": 1},
+                           day_utc_offset_min=_day_utc_offset_min())
+
+
+def _day_utc_offset_min() -> int:
+    """UTC offset, in minutes, of the clock the daily buckets roll on.
+
+    usage_ledger buckets "today" on this machine's local day, so the panel has
+    to measure hours elapsed on the same clock. A named zone in the browser
+    (it used to be America/Los_Angeles) drifts from the server whenever the two
+    disagree, as they have since BC stopped changing clocks in November 2026.
+    """
+    offset = time.localtime().tm_gmtoff
+    return int(offset // 60) if offset is not None else 0
 
 
 @app.route("/api/token-rate")

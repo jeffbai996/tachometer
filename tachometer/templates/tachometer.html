@@ -3443,6 +3443,8 @@ body { user-select: none; -webkit-user-select: none; }
 </style>
 
 <script>
+  // UTC offset of the server clock that daily usage buckets roll on.
+  const DAY_UTC_OFFSET_MIN = {{ day_utc_offset_min|default(0)|int }};
 /* ── Rolling digits — PORT of a sibling app's paintRollingTime ──────────
    the user asked for the same rolling animation (2026-07-27). I first wrote
    a 0-9 strip translated by -Nem; the original is better and this now matches
@@ -6128,15 +6130,15 @@ addEventListener("pageshow", (e) => {
     if (localDot) localDot.classList.toggle("is-fault", localFault);
     if (sshDot) sshDot.classList.toggle("is-fault", sshFault);
     if (staleEl) staleEl.hidden = true;
-    // SPEND needs the Pacific clock: usd_today is a PT-day bucket, so the
-    // elapsed fraction of the day has to be measured in the same timezone or
-    // the projection is wrong for any viewer outside PT. (NITE shared this
+    // SPEND needs the server's day clock: usd_today is bucketed on the
+    // server's local day, so the elapsed fraction of the day has to be
+    // measured on that clock or the projection is wrong. (NITE shared this
     // clock until it was replaced by LOAD on 2026-08-05.)
     // The lamp reads SPEND (reported, was GRAND); the element id stays
     // `tach-lamp-grand` deliberately — it's referenced from three places and
     // renaming it buys nothing the user can see.
-    const ptNowL = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-    const hrsL = ptNowL.getHours() + ptNowL.getMinutes() / 60 + ptNowL.getSeconds() / 3600;
+    const ptNowL = new Date(Date.now() + DAY_UTC_OFFSET_MIN * 60000);
+    const hrsL = ptNowL.getUTCHours() + ptNowL.getUTCMinutes() / 60 + ptNowL.getUTCSeconds() / 3600;
     // RATE is INSTANTANEOUS burn — what the fleet is costing right now, not a
     // projection of where the day lands. It reads usd_per_hour directly.
     //
@@ -6507,13 +6509,13 @@ addEventListener("pageshow", (e) => {
       if (todayD) paintRolling(todayD, "$" + Number(todayStr.slice(0, todayDot))
         .toLocaleString("en-US").replace(/,/g, "\u2009"));
       if (todayC) paintRolling(todayC, todayStr.slice(todayDot + 1));
-      /* PACE + RUN — both derived from usd_today over the PT day elapsed.
-         Pacific time is resolved via Intl rather than the viewer's own clock,
-         because usd_today is bucketed on the SERVER's Pacific day: computing
-         "hours elapsed" from a non-PT browser would divide a Pacific total by
-         the wrong denominator and quietly skew both figures. */
-      const ptNow = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-      const hrs = ptNow.getHours() + ptNow.getMinutes() / 60 + ptNow.getSeconds() / 3600;
+      /* PACE + RUN — both derived from usd_today over the server day elapsed.
+         The server's own UTC offset is used rather than the viewer's clock or
+         a named zone, because usd_today is bucketed on the SERVER's local day:
+         any other clock divides that total by the wrong denominator and
+         quietly skews both figures. */
+      const ptNow = new Date(Date.now() + DAY_UTC_OFFSET_MIN * 60000);
+      const hrs = ptNow.getUTCHours() + ptNow.getUTCMinutes() / 60 + ptNow.getUTCSeconds() / 3600;
       const paceEl = document.querySelector("#tach-odo-pace b");
       const runEl = document.querySelector("#tach-odo-run b");
       // guard the first minutes after midnight: dividing by ~0 would print a
